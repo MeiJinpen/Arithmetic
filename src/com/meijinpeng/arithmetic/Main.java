@@ -1,4 +1,4 @@
-package com.meijinpeng;
+package com.meijinpeng.arithmetic;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -8,7 +8,7 @@ public class Main {
 
     public static void main(String[] args) {
         Map<String, String> params = checkParams(args);
-        Arithmetic arithmetic = new Arithmetic(params);
+        Exercise exercise = new Exercise(params);
 
     }
 

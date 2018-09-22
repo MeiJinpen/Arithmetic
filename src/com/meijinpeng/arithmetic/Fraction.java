@@ -1,4 +1,4 @@
-package com.meijinpeng;
+package com.meijinpeng.arithmetic;
 
 /**
  * 分数属性类（包括整数）
@@ -37,8 +37,8 @@ public class Fraction {
     public Fraction(int s, int m) {
         this.s = s;
         this.m = m;
-        if(s <= 0 || m <= 0) {
-            throw new RuntimeException("分数分子分母不能为0");
+        if(m <= 0) {
+            throw new RuntimeException("分数分母不能为0");
         }
         handle();
     }

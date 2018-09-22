@@ -1,4 +1,4 @@
-package com.meijinpeng;
+package com.meijinpeng.arithmetic;
 
 import java.io.*;
 
