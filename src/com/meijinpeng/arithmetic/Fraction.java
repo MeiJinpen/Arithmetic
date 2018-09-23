@@ -37,16 +37,16 @@ public class Fraction {
     public Fraction(int s, int m) {
         this.s = s;
         this.m = m;
-        if(m <= 0) {
-            throw new RuntimeException("分数分母不能为0");
-        }
+//        if(m <= 0) {
+//            throw new RuntimeException("分数分母不能为0");
+//        }
         handle();
     }
 
     /**
-     * 约分或处理负数情况
+     * 约分
      */
-    public void handle() {
+    private void handle() {
         int mod = 1;
         int max = s > m ? s : m;
         for (int i = 1; i <= max; i++) {
@@ -56,7 +56,10 @@ public class Fraction {
         }
         this.s = s / mod;
         this.m = m / mod;
+    }
 
+    public boolean isZero() {
+        return m == 0;
     }
 
     public Fraction add(Fraction fraction) {
@@ -85,7 +88,7 @@ public class Fraction {
             return String.valueOf(s);
         } else {
             int z = 0;
-            if(s > m) {
+            if(m != 0 && s > m) {
                 z = s / m;
             }
             if(z == 0) {

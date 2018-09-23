@@ -2,6 +2,7 @@ package com.meijinpeng.arithmetic;
 
 import java.util.BitSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
@@ -9,38 +10,41 @@ import java.util.concurrent.ThreadLocalRandom;
  */
 public class Exercise {
 
-    private int maxCount = 100;  //生成题目数量，默认100条
-    private int maxNum = 100;   //生成题目的数值最大值
-    private int derBound = 20; //分母的范围，默认为20
-    private String exerciseFileName;
-    private String answerFileName;
+    private Operation operation;
 
-    //初始化
-    public Exercise(Map<String, String> params) {
-        for (String str: params.keySet()) {
-            if(str.equals(Constant.EXERCISE_NUMBER)) {
-                maxCount = Integer.valueOf(params.get(str));
-            } else if(str.equals(Constant.EXERCISE_NUM_MAX)) {
-                maxNum = Integer.valueOf(params.get(str));
-            } else if(str.equals(Constant.EXERCISE_FILE_NAME)) {
-                exerciseFileName = params.get(str);
-            } else if(str.equals(Constant.ANSWER_FILE_NAME)) {
-                answerFileName = params.get(str);
-            }
+    private Node root;
+
+    public Exercise(Operation operation) {
+        this.operation = operation;
+        ThreadLocalRandom random = ThreadLocalRandom.current();
+        int kind = random.nextInt(4);
+        if (kind == 0) kind = 1;
+        root = build(kind);
+        while (root.getValue().isZero()) {
+            root = build(kind);
         }
     }
 
-    public Exercise() {
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Exercise)) return false;
+        Exercise exercise = (Exercise) o;
+        return root.equals(exercise.root);
     }
 
-    public static void main(String[] args) {
-        Exercise exercise = new Exercise();
-        Node node = exercise.build(3);
-        System.out.println(exercise.print(node) + " = " + node.getValue());
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(root);
+    }
+
+    public Node getRoot() {
+        return root;
     }
 
     public Node build(int num) {
-        if(num == 0) {
+        if (num == 0) {
             return new Node(createFraction(), null, null);
         }
         ThreadLocalRandom random = ThreadLocalRandom.current();
@@ -50,21 +54,23 @@ public class Exercise {
         node.setLeft(build(left));
         node.setRight(build(right));
         Fraction value = calculate(((SymbolNode) node).getSymbol(), node.getLeft().getValue(), node.getRight().getValue());
-        if(value.isNegative()) {
+        if (value.isNegative()) {
             swapNode(node);
         }
+        value = calculate(((SymbolNode) node).getSymbol(), node.getLeft().getValue(), node.getRight().getValue());
         node.setValue(value);
         return node;
     }
 
     /**
      * 计算运算总结果
+     *
      * @param node
      * @return
      */
     private Fraction getResult(Node node) {
         //如果是叶子节点，则直接返回当前节点的value
-        if(node.getLeft() == null || node.getRight() == null) {
+        if (node.getLeft() == null || node.getRight() == null) {
             return node.getValue();
         }
         Node left = node.getLeft();
@@ -73,33 +79,40 @@ public class Exercise {
         Fraction valueLeft = getResult(left);
         Fraction valueRight = getResult(right);
         //如果计算出的数据是负数的话，说明由于是减法导致，需要把左右节点交换
-        if(valueLeft.isNegative()) {
+        if (valueLeft.isNegative()) {
             swapNode(left);
         }
-        if(valueRight.isNegative()) {
+        if (valueRight.isNegative()) {
             swapNode(right);
         }
-        String symbol = ((SymbolNode)node).getSymbol();
+        String symbol = ((SymbolNode) node).getSymbol();
         return calculate(symbol, valueLeft, valueRight);
+    }
+
+    /**
+     * 打印题目和答案，例如：“( 1 + 2 ) x 3 = 9”
+     */
+    public String print() {
+        return print(root) + " = " + root.getValue();
     }
 
     /**
      * 获取表达式，例如“( 1 + 2 ) x 3”
      */
-    private String print(Node node) {
-        if(node == null) {
+    public String print(Node node) {
+        if (node == null) {
             return "";
         }
         String mid = node.toString();
         String left = print(node.getLeft());
-        if(node.getLeft() instanceof SymbolNode && node instanceof SymbolNode) {
-            if(isNeedBrackets(((SymbolNode) node.getLeft()).getSymbol(), ((SymbolNode) node).getSymbol())) {
+        if (node.getLeft() instanceof SymbolNode && node instanceof SymbolNode) {
+            if (isNeedBrackets(((SymbolNode) node.getLeft()).getSymbol(), ((SymbolNode) node).getSymbol())) {
                 left = Constant.LEFT_BRACKETS + " " + left + " " + Constant.RIGHT_BRACKETS;
             }
         }
         String right = print(node.getRight());
-        if(node.getRight() instanceof SymbolNode && node instanceof SymbolNode) {
-            if(isNeedBrackets(((SymbolNode) node).getSymbol(), ((SymbolNode) node.getRight()).getSymbol())) {
+        if (node.getRight() instanceof SymbolNode && node instanceof SymbolNode) {
+            if (isNeedBrackets(((SymbolNode) node).getSymbol(), ((SymbolNode) node.getRight()).getSymbol())) {
                 right = Constant.LEFT_BRACKETS + " " + right + " " + Constant.RIGHT_BRACKETS;
             }
         }
@@ -142,10 +155,8 @@ public class Exercise {
     /**
      * 交换左右子树
      */
-    public void swapNode(Node node) {
+    private void swapNode(Node node) {
         if (node != null) {
-            swapNode(node.getLeft());
-            swapNode(node.getRight());
             Node t = node.getLeft();
             node.setLeft(node.getRight());
             node.setRight(t);
@@ -156,15 +167,15 @@ public class Exercise {
      * 随机生成分数
      */
     private Fraction createFraction() {
-        if(randomBoolean()) {
-            return new Fraction(random(maxNum), 1);
+        if (randomBoolean()) {
+            return new Fraction(random(operation.maxNum), 1);
         } else {
-            if(randomBoolean()) {
-                int y = random(derBound);
-                int x = random(y * maxNum);
+            if (randomBoolean()) {
+                int y = random(operation.derBound);
+                int x = random(y * operation.maxNum);
                 return new Fraction(x, y);
             } else {
-                int y = random(derBound);
+                int y = random(operation.derBound);
                 return new Fraction(random(y), y);
             }
         }
@@ -173,7 +184,7 @@ public class Exercise {
     private int random(int factor) {
         ThreadLocalRandom random = ThreadLocalRandom.current();
         int x = random.nextInt(factor);
-        while (x == 0) x = random.nextInt(factor);
+        if (x == 0) x = 1;
         return x;
     }
 
