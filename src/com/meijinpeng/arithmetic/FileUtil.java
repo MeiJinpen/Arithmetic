@@ -24,19 +24,22 @@ public class FileUtil {
 
     /**
      * 读文件内容
-     * @param fileName 文件名
      * @param callBack 回调接口，分别处理每一行
+     * @param exerciseFileName 题目文件
+     * @param answerFileName 答案文件
      */
-    public static void readFile(String fileName, ReaderCallBack callBack) {
-        File file = new File(fileName);
-        if(!file.exists()) {
+    public static void readFile(ReaderCallBack callBack, String exerciseFileName, String answerFileName) {
+        File exerciseFile = new File(exerciseFileName);
+        File answerFile = new File(answerFileName);
+        if(!exerciseFile.exists() || !answerFile.exists()) {
             System.out.println("文件不存在，请重试");
             return;
         }
-        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                callBack.deal(line);
+        try (BufferedReader br1 = new BufferedReader(new FileReader(exerciseFileName));
+            BufferedReader br2 = new BufferedReader(new FileReader(answerFileName))) {
+            String line1, line2;
+            while ((line1 = br1.readLine()) != null && (line2 = br2.readLine()) != null) {
+                callBack.deal(line1, line2);
             }
         } catch (IOException e) {
             System.out.println("读取文件失败...");
@@ -44,7 +47,7 @@ public class FileUtil {
     }
 
     public interface ReaderCallBack {
-        void deal(String line) throws IOException;
+        void deal(String exercise, String answer) throws IOException;
     }
 
 }

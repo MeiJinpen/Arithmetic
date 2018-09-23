@@ -1,8 +1,8 @@
 package com.meijinpeng.arithmetic;
 
-import java.util.BitSet;
-import java.util.Map;
-import java.util.Objects;
+import com.sun.org.apache.xalan.internal.xsltc.compiler.util.StringStack;
+
+import java.util.Stack;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
@@ -14,15 +14,21 @@ public class Exercise {
 
     private Node root;
 
-    public Exercise(Operation operation) {
+    public Exercise(Operation operation, boolean isAuto) {
         this.operation = operation;
-        ThreadLocalRandom random = ThreadLocalRandom.current();
-        int kind = random.nextInt(4);
-        if (kind == 0) kind = 1;
-        root = build(kind);
-        while (root.getValue().isZero()) {
+        if(isAuto) {
+            ThreadLocalRandom random = ThreadLocalRandom.current();
+            int kind = random.nextInt(4);
+            if (kind == 0) kind = 1;
             root = build(kind);
+            while (root.getValue().isZero()) {
+                root = build(kind);
+            }
         }
+    }
+
+    public Fraction getResult() {
+        return root.getValue();
     }
 
     @Override
@@ -33,16 +39,12 @@ public class Exercise {
         return root.equals(exercise.root);
     }
 
-    @Override
-    public int hashCode() {
-
-        return Objects.hash(root);
-    }
-
-    public Node getRoot() {
-        return root;
-    }
-
+    /**
+     * 随机生成一道四则运算题目
+     *
+     * @param num 运算符个数
+     * @return 二叉树
+     */
     public Node build(int num) {
         if (num == 0) {
             return new Node(createFraction(), null, null);
@@ -63,30 +65,50 @@ public class Exercise {
     }
 
     /**
-     * 计算运算总结果
-     *
-     * @param node
-     * @return
+     * 中缀表达式生成树
+     * @param exercise 中缀表达式
+     * @return 二叉树
      */
-    private Fraction getResult(Node node) {
-        //如果是叶子节点，则直接返回当前节点的value
-        if (node.getLeft() == null || node.getRight() == null) {
-            return node.getValue();
+    public Node build(String exercise) {
+        String[] strs = exercise.trim().split(" ");
+        Stack<Node> nodeStack = new Stack<>();
+        StringStack symbolStack = new StringStack();
+        //中缀表达式转换成前缀表达式，然后再用前序遍历生成数
+        for (int i = strs.length - 1; i >= 0; i--) {
+            String str = strs[i];
+            if (!str.matches("[()+\\u00F7\\-x]")) {
+                nodeStack.push(new Node(new Fraction(str)));
+            } else {
+                while (!symbolStack.empty() && (isMulOrDiv(symbolStack.peekString()) && isAddOrSub(str)
+                        || str.equals(Constant.LEFT_BRACKETS))) {
+                    String symbol = symbolStack.popString();
+                    if(symbol.equals(Constant.RIGHT_BRACKETS)) {
+                        break;
+                    }
+                    push(symbol, nodeStack);
+                }
+                if(str.equals(Constant.LEFT_BRACKETS)) {
+                    continue;
+                }
+                symbolStack.pushString(str);
+            }
         }
-        Node left = node.getLeft();
-        Node right = node.getRight();
-        //分别递归计算出左右子树的运算结果
-        Fraction valueLeft = getResult(left);
-        Fraction valueRight = getResult(right);
-        //如果计算出的数据是负数的话，说明由于是减法导致，需要把左右节点交换
-        if (valueLeft.isNegative()) {
-            swapNode(left);
+        while (!symbolStack.empty()) {
+            push(symbolStack.popString(), nodeStack);
         }
-        if (valueRight.isNegative()) {
-            swapNode(right);
-        }
-        String symbol = ((SymbolNode) node).getSymbol();
-        return calculate(symbol, valueLeft, valueRight);
+        this.root = nodeStack.pop();
+        return root;
+    }
+
+    /**
+     * 将符号压入节点栈且计算结果
+     */
+    private void push(String symbol, Stack<Node> nodeStack) {
+        Node left = nodeStack.pop();
+        Node right = nodeStack.pop();
+        SymbolNode node = new SymbolNode(symbol, left, right);
+        node.setValue(calculate(symbol, left.getValue(), right.getValue()));
+        nodeStack.push(node);
     }
 
     /**

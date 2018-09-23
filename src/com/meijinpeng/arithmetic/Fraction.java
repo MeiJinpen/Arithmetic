@@ -1,5 +1,7 @@
 package com.meijinpeng.arithmetic;
 
+import java.util.Objects;
+
 /**
  * 分数属性类（包括整数）
  */
@@ -21,8 +23,9 @@ public class Fraction {
             m = Integer.valueOf(str.substring(b + 1));
             s = z * m + Integer.valueOf(str.substring(a + 1, b));
         } else if(b != -1) {
-            s = Integer.valueOf(str.split("/")[0]);
-            m = Integer.valueOf(str.split("/")[1]);
+            String[] strs = str.split("/");
+            s = Integer.valueOf(strs[0]);
+            m = Integer.valueOf(strs[1]);
         } else {
             m = 1;
             s = Integer.valueOf(str);
@@ -98,4 +101,14 @@ public class Fraction {
             }
         }
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Fraction)) return false;
+        Fraction fraction = (Fraction) o;
+        return s == fraction.s &&
+                m == fraction.m;
+    }
+
 }

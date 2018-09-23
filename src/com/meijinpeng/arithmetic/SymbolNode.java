@@ -12,6 +12,11 @@ public class SymbolNode extends Node {
         this.symbol = symbol;
     }
 
+    public SymbolNode(String symbol) {
+        super(null);
+        this.symbol = symbol;
+    }
+
     public String getSymbol() {
         return symbol;
     }
