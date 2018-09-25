@@ -2,6 +2,7 @@ package com.meijinpeng.arithmetic;
 
 import com.sun.org.apache.xalan.internal.xsltc.compiler.util.StringStack;
 
+import java.util.Objects;
 import java.util.Stack;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -39,6 +40,11 @@ public class Exercise {
         return root.equals(exercise.root);
     }
 
+    @Override
+    public int hashCode() {
+        return root.hashCode();
+    }
+
     /**
      * 随机生成一道四则运算题目
      *
@@ -50,15 +56,15 @@ public class Exercise {
             return new Node(createFraction(), null, null);
         }
         ThreadLocalRandom random = ThreadLocalRandom.current();
-        Node node = new SymbolNode(Constant.SYMBOLS[random.nextInt(4)], null, null);
+        SymbolNode node = new SymbolNode(Constant.SYMBOLS[random.nextInt(4)], null, null);
         int left = random.nextInt(num);   //左子树运算符数量
         int right = num - left - 1;   //右子树运算符数量
         node.setLeft(build(left));
         node.setRight(build(right));
-        Fraction value = calculate(((SymbolNode) node).getSymbol(), node.getLeft().getValue(), node.getRight().getValue());
+        Fraction value = calculate(node.getSymbol(), node.getLeft().getValue(), node.getRight().getValue());
         if (value.isNegative()) {
             swapNode(node);
-            value = calculate(((SymbolNode) node).getSymbol(), node.getLeft().getValue(), node.getRight().getValue());
+            value = calculate(node.getSymbol(), node.getLeft().getValue(), node.getRight().getValue());
         }
         node.setValue(value);
         return node;

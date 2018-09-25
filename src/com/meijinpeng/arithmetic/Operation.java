@@ -42,14 +42,15 @@ public class Operation {
     public void generateExercisesAnswers() {
         StringBuilder exercises = new StringBuilder();
         StringBuilder answers = new StringBuilder();
-        Set<Exercise> set = new HashSet<>();
-        for (int i = 1; i <= maxCount; i++) {
+        List<Exercise> list = new ArrayList<>();
+        for (int i = 1; i <= maxCount;) {
             Exercise exercise = new Exercise(this, true);
-            String[] strs = exercise.print().split("=");
-            if(!set.contains(exercise)) {
+            if (!list.contains(exercise)) {
+                String[] strs = exercise.print().split("=");
                 exercises.append(i).append(". ").append(strs[0]).append("\n");
                 answers.append(i).append(".").append(strs[1]).append("\n");
-                set.add(exercise);
+                list.add(exercise);
+                i++;
             }
         }
         executor.execute(() -> FileUtil.writeFile(exercises.toString(), Constant.EXERCISE_FILE_DEFAULT));

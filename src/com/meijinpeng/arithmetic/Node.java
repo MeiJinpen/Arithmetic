@@ -64,7 +64,6 @@ public class Node {
 
     @Override
     public int hashCode() {
-
         return Objects.hash(value, left, right);
     }
 }

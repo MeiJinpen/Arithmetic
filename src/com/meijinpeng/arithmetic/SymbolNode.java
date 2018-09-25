@@ -1,5 +1,7 @@
 package com.meijinpeng.arithmetic;
 
+import java.util.Objects;
+
 /**
  * 记录符号的节点
  */
@@ -56,5 +58,8 @@ public class SymbolNode extends Node {
         return left && right;
     }
 
-
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), symbol);
+    }
 }
