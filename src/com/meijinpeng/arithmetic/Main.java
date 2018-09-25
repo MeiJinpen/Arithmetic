@@ -6,7 +6,6 @@ import java.util.Map;
 public class Main {
 
     public static void main(String[] args) {
-        args = new String[]{"-n", "10", "-r", "2", "-d", "2"};
         Map<String, String> params = checkParams(args);
         Operation operation = new Operation(params);
         if(params.containsKey("-e") && params.containsKey("-a")) {
