@@ -43,6 +43,7 @@ public class Operation {
         StringBuilder exercises = new StringBuilder();
         StringBuilder answers = new StringBuilder();
         List<Exercise> list = new ArrayList<>();
+        long start = System.currentTimeMillis();
         for (int i = 1; i <= maxCount;) {
             Exercise exercise = new Exercise(this, true);
             if (!list.contains(exercise)) {
@@ -51,6 +52,10 @@ public class Operation {
                 answers.append(i).append(".").append(strs[1]).append("\n");
                 list.add(exercise);
                 i++;
+            }
+            long end = System.currentTimeMillis();
+            if(end - start > 10000) {
+                throw new RuntimeException("生成题目时间过长，可能传入参数范围过大或过小，请重试");
             }
         }
         executor.execute(() -> FileUtil.writeFile(exercises.toString(), Constant.EXERCISE_FILE_DEFAULT));
@@ -62,13 +67,15 @@ public class Operation {
             while (loop) {
                 loop = !executor.awaitTermination(30, TimeUnit.SECONDS);  //超时等待阻塞，直到线程池里所有任务结束
             } //等待所有任务完成
-            System.out.println("生成的" + maxCount + "道题和答案存放在当前目录下的Exercises.txt和Answers.txt");
+            long end = System.currentTimeMillis();
+            System.out.println("生成的" + maxCount + "道题和答案存放在当前目录下的Exercises.txt和Answers.txt，耗时为" + (end - start) + "ms");
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
     }
 
     public void checkExercises() {
+        long start = System.currentTimeMillis();
         List<String> correctNums = new ArrayList<>();
         List<String> wrongNums = new ArrayList<>();
         FileUtil.readFile((exercise, answer) -> {
@@ -87,7 +94,8 @@ public class Operation {
             }
         }, exerciseFileName, answerFileName);
         FileUtil.writeFile(printResult(correctNums, wrongNums), Constant.GRADE_FILE_DEFAULT);
-        System.out.println("题目答案对错统计存在当前目录下的Grade.txt文件下");
+        long end = System.currentTimeMillis();
+        System.out.println("题目答案对错统计存在当前目录下的Grade.txt文件下，耗时为：" + (end - start) + "ms");
     }
 
     private String printResult(List<String> correctNums, List<String> wrongNums) {
