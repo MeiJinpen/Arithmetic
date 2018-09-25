@@ -5,10 +5,7 @@ import java.util.Map;
 
 public class Main {
 
-
     public static void main(String[] args) {
-//        args = new String[]{"-n", "100", "-r", "100", "-d", "10"};
-        args = new String[]{"-e", "Exercises.txt", "-a", "Answers.txt"};
         Map<String, String> params = checkParams(args);
         Operation operation = new Operation(params);
         if(params.containsKey("-e") && params.containsKey("-a")) {

@@ -58,8 +58,8 @@ public class Exercise {
         Fraction value = calculate(((SymbolNode) node).getSymbol(), node.getLeft().getValue(), node.getRight().getValue());
         if (value.isNegative()) {
             swapNode(node);
+            value = calculate(((SymbolNode) node).getSymbol(), node.getLeft().getValue(), node.getRight().getValue());
         }
-        value = calculate(((SymbolNode) node).getSymbol(), node.getLeft().getValue(), node.getRight().getValue());
         node.setValue(value);
         return node;
     }
@@ -128,13 +128,13 @@ public class Exercise {
         String mid = node.toString();
         String left = print(node.getLeft());
         if (node.getLeft() instanceof SymbolNode && node instanceof SymbolNode) {
-            if (isNeedBrackets(((SymbolNode) node.getLeft()).getSymbol(), ((SymbolNode) node).getSymbol())) {
+            if (isNeedBracketsLeft(((SymbolNode) node.getLeft()).getSymbol(), ((SymbolNode) node).getSymbol())) {
                 left = Constant.LEFT_BRACKETS + " " + left + " " + Constant.RIGHT_BRACKETS;
             }
         }
         String right = print(node.getRight());
         if (node.getRight() instanceof SymbolNode && node instanceof SymbolNode) {
-            if (isNeedBrackets(((SymbolNode) node).getSymbol(), ((SymbolNode) node.getRight()).getSymbol())) {
+            if (isNeedBracketsRight(((SymbolNode) node.getRight()).getSymbol(), ((SymbolNode) node).getSymbol())) {
                 right = Constant.LEFT_BRACKETS + " " + right + " " + Constant.RIGHT_BRACKETS;
             }
         }
@@ -151,11 +151,26 @@ public class Exercise {
         return symbol.equals(Constant.MULTIPLICATION) || symbol.equals(Constant.DIVISION);
     }
 
+    //判断是否为减法
+    private boolean isSubtract(String symbol) {
+        return symbol.equals(Constant.SUBTRACTION);
+    }
+
+    private boolean isDivide(String symbol) {
+        return symbol.equals(Constant.DIVISION);
+    }
+
     /**
      * 比较两个符号中谁优先级最高，由于子树的符号优先级低需要加括号
      */
-    private boolean isNeedBrackets(String one, String two) {
-        return isAddOrSub(one) && isMulOrDiv(two);
+    private boolean isNeedBracketsLeft(String left, String mid) {
+        return isAddOrSub(left) && isMulOrDiv(mid);
+    }
+
+    /*当右边需要加括号时，可以分为几种情况，第一种中间为除号时，右边所有运算都需要加括号，
+    第二种中间为减号时，右边的加减法需要加括号，第三种优先级*/
+    private boolean isNeedBracketsRight(String right, String mid) {
+        return isAddOrSub(right) && isMulOrDiv(mid) || isDivide(mid) || isSubtract(mid) && isAddOrSub(mid);
     }
 
     /**

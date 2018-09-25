@@ -40,7 +40,6 @@ public class Operation {
      * 生成随机题目
      */
     public void generateExercisesAnswers() {
-        long start = System.currentTimeMillis();
         StringBuilder exercises = new StringBuilder();
         StringBuilder answers = new StringBuilder();
         Set<Exercise> set = new HashSet<>();
@@ -62,8 +61,7 @@ public class Operation {
             while (loop) {
                 loop = !executor.awaitTermination(30, TimeUnit.SECONDS);  //超时等待阻塞，直到线程池里所有任务结束
             } //等待所有任务完成
-            long end = System.currentTimeMillis();
-            System.out.println((end - start));
+            System.out.println("生成的" + maxCount + "道题和答案存放在当前目录下的Exercises.txt和Answers.txt");
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -88,6 +86,7 @@ public class Operation {
             }
         }, exerciseFileName, answerFileName);
         FileUtil.writeFile(printResult(correctNums, wrongNums), Constant.GRADE_FILE_DEFAULT);
+        System.out.println("题目答案对错统计存在当前目录下的Grade.txt文件下");
     }
 
     private String printResult(List<String> correctNums, List<String> wrongNums) {
