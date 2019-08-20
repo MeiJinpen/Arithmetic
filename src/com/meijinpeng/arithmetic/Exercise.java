@@ -85,6 +85,7 @@ public class Exercise {
             if (!str.matches("[()+\\u00F7\\-x]")) {
                 nodeStack.push(new Node(new Fraction(str)));
             } else {
+                //符号结点
                 while (!symbolStack.empty() && (isMulOrDiv(symbolStack.peekString()) && isAddOrSub(str)
                         || str.equals(Constant.LEFT_BRACKETS))) {
                     String symbol = symbolStack.popString();
@@ -97,7 +98,7 @@ public class Exercise {
                     continue;
                 }
                 symbolStack.pushString(str);
-            }
+        }
         }
         while (!symbolStack.empty()) {
             push(symbolStack.popString(), nodeStack);
